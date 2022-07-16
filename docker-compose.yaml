@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: build/api/Dockerfile.dev
+    container_name: api
+    depends_on:
+      - db
+    env_file:
+      - .env
+    ports:
+      - 8080:8080
+    stdin_open: true
+    tty: true
+    volumes:
+      - type: bind
+        source: app
+        target: /go/src/app
+
+  db:
+    build:
+      context: .
+      dockerfile: build/db/Dockerfile
+    container_name: db
+    env_file:
+    - .env
+    ports:
+      - 3306:3306
+    restart: always
+    volumes:
+      - type: volume
+        source: db-data
+        target: /var/lib/mysql
+        volume:
+          nocopy: true
+
+volumes:
+  db-data:

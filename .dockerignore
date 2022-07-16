@@ -1,0 +1,7 @@
+.env**
+
+# Docker
+build/**/Dockerfile*
+
+# Git
+.git*
