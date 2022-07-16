@@ -11,7 +11,10 @@ services:
     env_file:
       - .env
     ports:
-      - 8080:8080
+      - target: 8080
+        published: 8080
+        protocol: TCP
+        mode: host
     stdin_open: true
     tty: true
     volumes:
@@ -27,7 +30,10 @@ services:
     env_file:
     - .env
     ports:
-      - 3306:3306
+      - target: 3306
+        published: 3306
+        protocol: TCP
+        mode: host
     restart: always
     volumes:
       - type: volume
