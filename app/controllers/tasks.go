@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
 
@@ -12,12 +14,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const tableName string = "tasks"
+
 type Task struct {
-	Id        int    `json:"id"`
+	Id        int    `json:"id,omitempty"`
 	Title     string `json:"title"`
 	Body      string `json:"body"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
+	CreatedAt string `json:"created_at,omitempty"`
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
 func GetHandler(w http.ResponseWriter, r *http.Request) {
@@ -32,34 +36,66 @@ func GetAllHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hell create")
+	var task Task
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
-	title := r.FormValue("title")
-	body := r.FormValue("body")
+	err = json.Unmarshal(body, &task)
+	if err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
-	stmt, err := database.Db.Prepare("")
+	if task.Title == "" || task.Body == "" {
+		log.Println("invalid request format")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
-	fmt.Println(stmt)
+	stmt, err := database.Db.Prepare(fmt.Sprintf("INSERT INTO %s (title, body, created_at, updated_at) VALUES (?, ?, ?, ?)", tableName))
 
 	if err != nil {
+		log.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
+
+	defer stmt.Close()
 
 	now := time.Now().Format("2006-01-02 15:04:05")
-	data := Task{
-		Title:     title,
-		Body:      body,
-		CreatedAt: now,
-		UpdatedAt: now,
+	task.CreatedAt = now
+	task.UpdatedAt = now
+	res, err := stmt.Exec(task.Title, task.Body, task.CreatedAt, task.UpdatedAt)
+
+	if err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
+
+	id, _ := res.LastInsertId()
+	task.Id = int(id)
 
 	var buf bytes.Buffer
-	j := json.NewEncoder(&buf)
-	if err := j.Encode(&data); err != nil {
+	je := json.NewEncoder(&buf)
+
+	if err = je.Encode(&task); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, err.Error())
+		return
 	}
 
-	_, _ = fmt.Fprint(w, buf.String())
+	w.WriteHeader(http.StatusOK)
+	_, err = fmt.Fprint(w, buf.String())
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
 }
 
 func UpdateHandler(w http.ResponseWriter, r *http.Request) {
