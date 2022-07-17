@@ -49,7 +49,7 @@ func main() {
 	r.HandleFunc("/", handler)
 
 	// tasks route
-	s := r.PathPrefix("/controllers").Subrouter()
+	s := r.PathPrefix("/tasks").Subrouter()
 	s.HandleFunc("", controllers.GetAllHandler).Methods("GET")
 	s.HandleFunc("", controllers.CreateHandler).Methods("POST")
 	s.HandleFunc("/{id}", controllers.GetHandler).Methods("GET")
