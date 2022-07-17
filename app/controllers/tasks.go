@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"go-rest-api-docker/database"
@@ -25,10 +26,51 @@ type Task struct {
 }
 
 func GetHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 
-	fmt.Fprintf(w, "Hell get %s:%s", vars["id"], vars["name"])
+	vars := mux.Vars(r)
+
+	var task Task
+	if vars["id"] == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, "{ \"message\": \"Invalid request\"}")
+		return
+	}
+
+	task.Id, _ = strconv.Atoi(vars["id"])
+	stmt, err := database.Db.Prepare(fmt.Sprintf("SELECT * from %s WHERE id = ?", tableName))
+
+	if err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, err)
+		return
+	}
+
+	defer stmt.Close()
+
+	if err = stmt.QueryRow(task.Id).Scan(&task.Id, &task.Title, &task.Body, &task.CreatedAt, &task.UpdatedAt); err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprint(w, "{ \"message\": \"Not Found\"}")
+		return
+	}
+
+	var buf bytes.Buffer
+	je := json.NewEncoder(&buf)
+
+	if err = je.Encode(&task); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, err = fmt.Fprint(w, buf.String())
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
 }
 
 func GetAllHandler(w http.ResponseWriter, r *http.Request) {
@@ -39,6 +81,7 @@ func GetAllHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, err)
+		return
 	}
 
 	defer rows.Close()
@@ -47,6 +90,7 @@ func GetAllHandler(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		task := Task{}
 		if err = rows.Scan(&task.Id, &task.Title, &task.Body, &task.CreatedAt, &task.UpdatedAt); err != nil {
+			log.Println(err.Error())
 			continue
 		}
 		tasks = append(tasks, task)
