@@ -1,0 +1,65 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "go-rest-api-docker",
+    "dateExported": "2022-07-16T02:36:08.712Z",
+    "version": "1.1",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "3ed44a11-46c3-4080-b0df-cb80e259cc6e",
+            "colId": "749387c2-4fff-4afb-9b19-1b898f48f7d9",
+            "containerId": "",
+            "name": "root",
+            "url": "http://localhost:8080",
+            "method": "GET",
+            "sortNum": 10000,
+            "created": "2022-07-15T10:05:08.245Z",
+            "modified": "2022-07-15T10:05:17.922Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "029c2d27-481f-46f5-b83f-e71b38f6971c",
+            "colId": "749387c2-4fff-4afb-9b19-1b898f48f7d9",
+            "containerId": "",
+            "name": "/tasks",
+            "url": "http://localhost:8080/tasks",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2022-07-15T10:49:59.736Z",
+            "modified": "2022-07-15T10:50:20.508Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "9881fb10-e597-4566-af22-92fe0c407c8b",
+            "colId": "749387c2-4fff-4afb-9b19-1b898f48f7d9",
+            "containerId": "",
+            "name": "/tasks/{id}",
+            "url": "http://localhost:8080/tasks/123",
+            "method": "GET",
+            "sortNum": 30000,
+            "created": "2022-07-15T10:55:45.674Z",
+            "modified": "2022-07-15T10:58:37.321Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "e221b146-27e6-4b42-8e49-a8e5eabe2691",
+            "colId": "749387c2-4fff-4afb-9b19-1b898f48f7d9",
+            "containerId": "",
+            "name": "/tasks/{id}",
+            "url": "http://localhost:8080/tasks/21",
+            "method": "PUT",
+            "sortNum": 40000,
+            "created": "2022-07-15T11:00:21.106Z",
+            "modified": "2022-07-15T11:00:37.888Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        }
+    ]
+}
