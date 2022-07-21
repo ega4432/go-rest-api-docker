@@ -1,7 +1,7 @@
 {
     "client": "Thunder Client",
     "collectionName": "go-rest-api-docker",
-    "dateExported": "2022-07-16T02:36:08.712Z",
+    "dateExported": "2022-07-21T12:54:58.628Z",
     "version": "1.1",
     "folders": [],
     "requests": [
@@ -38,11 +38,11 @@
             "colId": "749387c2-4fff-4afb-9b19-1b898f48f7d9",
             "containerId": "",
             "name": "/tasks/{id}",
-            "url": "http://localhost:8080/tasks/123",
+            "url": "http://localhost:8080/tasks/11",
             "method": "GET",
             "sortNum": 30000,
             "created": "2022-07-15T10:55:45.674Z",
-            "modified": "2022-07-15T10:58:37.321Z",
+            "modified": "2022-07-21T12:53:58.412Z",
             "headers": [],
             "params": [],
             "tests": []
@@ -52,11 +52,49 @@
             "colId": "749387c2-4fff-4afb-9b19-1b898f48f7d9",
             "containerId": "",
             "name": "/tasks/{id}",
-            "url": "http://localhost:8080/tasks/21",
+            "url": "http://localhost:8080/tasks/2",
             "method": "PUT",
             "sortNum": 40000,
             "created": "2022-07-15T11:00:21.106Z",
-            "modified": "2022-07-15T11:00:37.888Z",
+            "modified": "2022-07-21T12:50:55.330Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n    \"body\": \"test task2\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "461a6aff-0aa5-478b-8750-61f9b4d11c43",
+            "colId": "749387c2-4fff-4afb-9b19-1b898f48f7d9",
+            "containerId": "",
+            "name": "/tasks",
+            "url": "http://localhost:8080/tasks",
+            "method": "POST",
+            "sortNum": 50000,
+            "created": "2022-07-17T01:33:00.944Z",
+            "modified": "2022-07-21T12:53:45.894Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n    \"title\": \"delete task\",\n    \"body\": \"This is dummy\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "d847de51-10a1-4b7b-8528-51bb1504223b",
+            "colId": "749387c2-4fff-4afb-9b19-1b898f48f7d9",
+            "containerId": "",
+            "name": "/tasks/{id}",
+            "url": "http://localhost:8080/tasks/11",
+            "method": "DELETE",
+            "sortNum": 60000,
+            "created": "2022-07-21T12:53:11.788Z",
+            "modified": "2022-07-21T12:54:06.145Z",
             "headers": [],
             "params": [],
             "tests": []
