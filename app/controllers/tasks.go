@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"go-rest-api-docker/database"
@@ -187,10 +188,136 @@ func CreateHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 
-	fmt.Fprintf(w, "Hell Update id: %s", vars["id"])
+	vars := mux.Vars(r)
+
+	var t Task
+	if vars["id"] == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, "{ \"message\": \"Invalid request\"}")
+		return
+	}
+
+	var buf bytes.Buffer
+	je := json.NewEncoder(&buf)
+
+	if err := je.Encode(&t); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, err)
+		return
+	}
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, err)
+		return
+	}
+
+	err = json.Unmarshal(body, &t)
+	if err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, err)
+		return
+	}
+
+	t.Id, _ = strconv.Atoi(vars["id"])
+
+	var columns []string
+
+	if t.Title != "" {
+		columns = append(columns, "title = ?")
+	}
+
+	if t.Body != "" {
+		columns = append(columns, "body = ?")
+	}
+
+	if t.Title == "" && t.Body == "" {
+		log.Println("Not column is set")
+		w.WriteHeader(http.StatusBadGateway)
+		fmt.Fprint(w, "{ \"message\": \"Column has not been set.\" }")
+		return
+	}
+
+	columns = append(columns, "updated_at = ?")
+	t.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
+
+	query := fmt.Sprintf("UPDATE %s SET %s WHERE id = ?", tableName, strings.Join(columns, ", "))
+
+	stmt, err := database.Db.Prepare(query)
+
+	if err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, err)
+		return
+	}
+
+	defer stmt.Close()
+
+	if t.Title != "" && t.Body != "" {
+		stmt, err := database.Db.Prepare(fmt.Sprintf("UPDATE %s SET title = ?, body = ?, updated_at = ? WHERE id = ?", tableName))
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w, err)
+			return
+		}
+
+		_, err = stmt.Exec(t.Title, t.Body, t.UpdatedAt, t.Id)
+
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w, err)
+			return
+		}
+	} else if t.Title != "" {
+		stmt, err := database.Db.Prepare(fmt.Sprintf("UPDATE %s SET title = ?, updated_at = ? WHERE id = ?", tableName))
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w, err)
+			return
+		}
+
+		_, err = stmt.Exec(t.Body, t.UpdatedAt, t.Id)
+
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w, err)
+			return
+		}
+	} else if t.Body != "" {
+		stmt, err := database.Db.Prepare(fmt.Sprintf("UPDATE %s SET body = ?, updated_at = ? WHERE id = ?", tableName))
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w, err)
+			return
+		}
+
+		_, err = stmt.Exec(t.Title, t.UpdatedAt, t.Id)
+
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w, err)
+			return
+		}
+	} else {
+		log.Println("else section")
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, "{ \"message\": \"\"")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, t.Id)
 }
 
 func DeleteHandler(w http.ResponseWriter, r *http.Request) {
