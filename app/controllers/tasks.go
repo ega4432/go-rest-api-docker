@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"go-rest-api-docker/database"
@@ -224,39 +223,7 @@ func UpdateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	t.Id, _ = strconv.Atoi(vars["id"])
-
-	var columns []string
-
-	if t.Title != "" {
-		columns = append(columns, "title = ?")
-	}
-
-	if t.Body != "" {
-		columns = append(columns, "body = ?")
-	}
-
-	if t.Title == "" && t.Body == "" {
-		log.Println("Not column is set")
-		w.WriteHeader(http.StatusBadGateway)
-		fmt.Fprint(w, "{ \"message\": \"Column has not been set.\" }")
-		return
-	}
-
-	columns = append(columns, "updated_at = ?")
 	t.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
-
-	query := fmt.Sprintf("UPDATE %s SET %s WHERE id = ?", tableName, strings.Join(columns, ", "))
-
-	stmt, err := database.Db.Prepare(query)
-
-	if err != nil {
-		log.Println(err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(w, err)
-		return
-	}
-
-	defer stmt.Close()
 
 	if t.Title != "" && t.Body != "" {
 		stmt, err := database.Db.Prepare(fmt.Sprintf("UPDATE %s SET title = ?, body = ?, updated_at = ? WHERE id = ?", tableName))
@@ -266,6 +233,8 @@ func UpdateHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, err)
 			return
 		}
+
+		defer stmt.Close()
 
 		_, err = stmt.Exec(t.Title, t.Body, t.UpdatedAt, t.Id)
 
@@ -284,7 +253,9 @@ func UpdateHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		_, err = stmt.Exec(t.Body, t.UpdatedAt, t.Id)
+		defer stmt.Close()
+
+		_, err = stmt.Exec(t.Title, t.UpdatedAt, t.Id)
 
 		if err != nil {
 			log.Println(err.Error())
@@ -301,7 +272,9 @@ func UpdateHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		_, err = stmt.Exec(t.Title, t.UpdatedAt, t.Id)
+		defer stmt.Close()
+
+		_, err = stmt.Exec(t.Body, t.UpdatedAt, t.Id)
 
 		if err != nil {
 			log.Println(err.Error())
@@ -312,7 +285,7 @@ func UpdateHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		log.Println("else section")
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "{ \"message\": \"\"")
+		fmt.Fprint(w, "{ \"message\": \"else section\" }")
 		return
 	}
 
