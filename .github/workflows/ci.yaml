@@ -53,7 +53,7 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.actor }}/go-rest-api-docker_${{ matrix.paths }}:${{ steps.set-var.outputs.tag }}
           cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,src=/tmp/.buildx-cache-new,mode=max
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
       # Until this issue close
       # https://github.com/moby/buildkit/issues/1896
