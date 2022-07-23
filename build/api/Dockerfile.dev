@@ -10,11 +10,11 @@ RUN apk update && \
     apk add git
 
 # Copy go.mod and go.sum
-COPY app/go.* .
+COPY app/go.* ./
 
 RUN go install github.com/cosmtrek/air@v1.40.4
 
-COPY app/ .
+COPY app/ ./
 
 RUN go get -d -v ./...
 
