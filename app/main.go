@@ -12,8 +12,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type Data struct {
-	Status  int    `json:"status"`
+type Response struct {
 	Message string `json:"message"`
 }
 
@@ -21,10 +20,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json;charset=utf-8")
 
-	data := Data{
-		Status:  200,
-		Message: "Welcome to the Go REST API!",
-	}
+	data := Response{Message: "Welcome to the Go REST API!"}
 
 	var buf bytes.Buffer
 	j := json.NewEncoder(&buf)
@@ -43,10 +39,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func main() {
+func SetupServer() *mux.Router {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", handler)
+	return r
+}
+
+func main() {
+	r := SetupServer()
 
 	// tasks route
 	s := r.PathPrefix("/tasks").Subrouter()
