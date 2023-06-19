@@ -49,5 +49,21 @@ services:
         volume:
           nocopy: true
 
+  proxy:
+    image: nginx:1.25.1
+    container_name: proxy
+    volumes:
+      - type: bind
+        source: ./nginx/nginx.conf
+        target: /etc/nginx/conf.d/default.conf
+        read_only: true
+    ports:
+      - target: 80
+        published: 80
+        protocol: TCP
+        mode: host
+    depends_on:
+      - api
+
 volumes:
   db-data:

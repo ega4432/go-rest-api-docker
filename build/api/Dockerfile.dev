@@ -7,7 +7,7 @@ ENV GO111MODULE on
 WORKDIR /go/src/app
 
 RUN apk update && \
-    apk add git
+    apk add --no-cache git
 
 # Copy go.mod and go.sum
 COPY app/go.* ./
